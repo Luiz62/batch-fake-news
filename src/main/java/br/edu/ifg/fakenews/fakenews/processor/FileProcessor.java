@@ -20,14 +20,20 @@ public class FileProcessor implements ItemProcessor<TextFileData, Tb001News> {
     @Value("#{jobParameters['statusNews']}")
     private String statusNews;
 
+    @SuppressWarnings("NullableProblems")
     @Override
     public Tb001News process(TextFileData item) {
 
+        if (item == null) return null;
         Tb001News tb001News = new Tb001News();
-        tb001News.setStatusNews(StatusNews.of(statusNews.toUpperCase()).getNome());
+        if (statusNews != null) {
+            tb001News.setStatusNews(StatusNews.of(statusNews.toUpperCase()).getNome());
+        }
         tb001News.setStatusNewsAlgorithm(StatusNews.NO_PROCESS.getNome());
         tb001News.setNews(item.getNews() != null ? item.getNews() : "INVALID TEXT");
-        tb001News.setIdFile(extractIdFile(item.getInputSrcFileName()));
+        if (item.getInputSrcFileName() != null) {
+            tb001News.setIdFile(extractIdFile(item.getInputSrcFileName()));
+        }
         return tb001News;
 
     }
