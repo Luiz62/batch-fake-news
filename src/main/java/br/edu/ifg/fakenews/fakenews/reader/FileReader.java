@@ -5,8 +5,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;
 import org.springframework.batch.core.partition.support.MultiResourcePartitioner;
 import org.springframework.batch.core.partition.support.Partitioner;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
+import org.springframework.batch.item.ItemReader;
+import org.springframework.batch.item.support.ListItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -17,7 +17,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -26,7 +25,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-@SuppressWarnings("NullableProblems")
 @Configuration
 public class FileReader {
 
@@ -37,7 +35,7 @@ public class FileReader {
 
         MultiResourcePartitioner partitioner = new MultiResourcePartitioner();
         partitioner.setResources(getResources(dir));
-        partitioner.partition(1000);
+        partitioner.partition(500);
         return partitioner;
     }
 
@@ -45,23 +43,20 @@ public class FileReader {
     @StepScope
     @Qualifier("itemReader")
     @DependsOn("partitioner")
-    public FlatFileItemReader<TextFileData> itemReader(@Value("#{stepExecutionContext['fileName']}") String filename) throws Exception {
-        return new FlatFileItemReaderBuilder<TextFileData>().name("myItemReader")
-                .delimited()
-                .names(new String[] { "firstName", "lastName" })
-                .encoding(StandardCharsets.UTF_8.displayName())
-                .lineMapper((line, lineNumber) -> {
-                    TextFileData textFileData = new TextFileData();
-                    textFileData.setNews(line);
-                    textFileData.setInputSrcFileName(filename);
-                    return textFileData;
-                })
-                .resource(new UrlResource(filename))
-                .saveState(true)
-                .strict(true)
-                .build();
+    public ItemReader<TextFileData> customFileReader(@Value("#{stepExecutionContext['fileName']}") String filename) throws Exception {
+        List<String> allLines = Files.readAllLines(Paths.get(new UrlResource(filename).getURI()));
+        StringBuilder content = new StringBuilder();
 
+        for (String line : allLines) {
+            if (!line.trim().isEmpty()) {
+                content.append(line).append(" ");
+            }
+        }
+        TextFileData fileData = new TextFileData(content.toString().trim(), filename);
+        return new ListItemReader<>(List.of(fileData));
     }
+
+
 
     private String tryName(String filename) {
         return filename.replace("file:/", "");

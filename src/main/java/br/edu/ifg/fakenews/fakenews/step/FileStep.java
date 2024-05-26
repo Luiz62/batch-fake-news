@@ -7,15 +7,12 @@ import org.springframework.batch.core.Step;
 import org.springframework.batch.core.partition.support.Partitioner;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
+import org.springframework.batch.item.ItemReader;
 import org.springframework.batch.item.database.JdbcBatchItemWriter;
-import org.springframework.batch.item.file.FlatFileItemReader;
-import org.springframework.batch.item.file.MultiResourceItemReader;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.scheduling.concurrent.SimpleAsyncTaskScheduler;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
@@ -23,13 +20,13 @@ public class FileStep {
 
     @Bean(name = "step1")
     public Step step1(
-            FlatFileItemReader<TextFileData> itemReader,
+            ItemReader<TextFileData> itemReader,
             FileProcessor processor,
             JdbcBatchItemWriter<Tb001News> writer,
             JobRepository jobRepository,
             PlatformTransactionManager transactionManager) {
         return new StepBuilder("stepFile", jobRepository)
-                .<TextFileData, Tb001News>chunk(1000, transactionManager)
+                .<TextFileData, Tb001News>chunk(1, transactionManager)
                 .processor(processor)
                 .writer(writer)
                 .reader(itemReader)

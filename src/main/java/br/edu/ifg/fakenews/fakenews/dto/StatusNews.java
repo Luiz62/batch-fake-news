@@ -9,10 +9,9 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public enum StatusNews {
     TRUE(0, "TRUE"),
-    FALSE(1, "FALSE"),
+    FAKE(1, "FAKE"),
     PROCESSING(2, "PROCESSING"),
     NO_PROCESS(3, "NO_PROCESS");
-
     private final Integer id;
 
     private final String nome;
