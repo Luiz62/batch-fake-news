@@ -15,8 +15,8 @@ public class FileItemWriter {
     public JdbcBatchItemWriter<Tb001News> itemWriter(DataSource dataSource) {
         JdbcBatchItemWriter<Tb001News> writer = new JdbcBatchItemWriter<>();
         writer.setItemSqlParameterSourceProvider(new BeanPropertyItemSqlParameterSourceProvider<>());
-        writer.setSql("INSERT INTO tb001_news (status_news, news, status_news_algorithm, id_file) " +
-                "VALUES (CAST(:statusNews AS TP001_STATUS_NEWS), :news, CAST(:statusNewsAlgorithm AS TP001_STATUS_NEWS), :idFile)");
+        writer.setSql("INSERT INTO tb001_news (status_news, news, id_file) " +
+                "VALUES (CAST(:statusNews AS TP001_STATUS_NEWS), :news, :idFile)");
         writer.setDataSource(dataSource);
         return writer;
     }

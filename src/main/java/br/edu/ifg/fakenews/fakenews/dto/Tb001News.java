@@ -12,7 +12,5 @@ public class Tb001News {
 
     private String news;
 
-    private String statusNewsAlgorithm;
-
     private Integer idFile;
 }

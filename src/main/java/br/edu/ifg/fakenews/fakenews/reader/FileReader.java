@@ -17,12 +17,14 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Configuration
@@ -39,21 +41,35 @@ public class FileReader {
         return partitioner;
     }
 
+    @SuppressWarnings("UnnecessaryUnicodeEscape")
     @Bean
     @StepScope
     @Qualifier("itemReader")
     @DependsOn("partitioner")
     public ItemReader<TextFileData> customFileReader(@Value("#{stepExecutionContext['fileName']}") String filename) throws Exception {
-        List<String> allLines = Files.readAllLines(Paths.get(new UrlResource(filename).getURI()));
+        List<String> allLines = Files.readAllLines(Paths.get(new UrlResource(filename).getURI()), StandardCharsets.UTF_8);
         StringBuilder content = new StringBuilder();
+
+        Pattern pattern = Pattern.compile("[^\u0020-\u007E\u00A0-\u00FF]");
 
         for (String line : allLines) {
             if (!line.trim().isEmpty()) {
-                content.append(line).append(" ");
+                String sanitizedLine = pattern.matcher(line).replaceAll("");
+                content.append(sanitizedLine).append(" ");
             }
         }
-        TextFileData fileData = new TextFileData(content.toString().trim(), filename);
-        return new ListItemReader<>(List.of(fileData));
+
+        String fileContent = content.toString().trim();
+        log.debug("Processed content for file " + filename + ": " + fileContent);
+
+        List<TextFileData> fileDataList = new ArrayList<>();
+        if (!fileContent.isEmpty()) {
+            fileDataList.add(new TextFileData(fileContent, filename));
+        } else {
+            log.warn("File " + filename + " is empty after processing.");
+        }
+
+        return new ListItemReader<>(fileDataList);
     }
 
 

@@ -29,7 +29,6 @@ public class FileProcessor implements ItemProcessor<TextFileData, Tb001News> {
         if (statusNews != null) {
             tb001News.setStatusNews(StatusNews.of(statusNews.toUpperCase()).getNome());
         }
-        tb001News.setStatusNewsAlgorithm(StatusNews.NO_PROCESS.getNome());
         tb001News.setNews(item.getNews() != null ? item.getNews() : "INVALID TEXT");
         if (item.getInputSrcFileName() != null) {
             tb001News.setIdFile(extractIdFile(item.getInputSrcFileName()));
