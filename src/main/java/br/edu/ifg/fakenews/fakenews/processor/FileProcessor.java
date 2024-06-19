@@ -1,7 +1,7 @@
 package br.edu.ifg.fakenews.fakenews.processor;
 
 import br.edu.ifg.fakenews.fakenews.dto.StatusNews;
-import br.edu.ifg.fakenews.fakenews.dto.Tb001News;
+import br.edu.ifg.fakenews.fakenews.domain.Tb001News;
 import br.edu.ifg.fakenews.fakenews.dto.TextFileData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.batch.core.configuration.annotation.StepScope;

@@ -10,12 +10,14 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class FileJob {
+public class TryNewsJob {
 
-    @Bean(name = "jobFile")
-    public Job job(@Qualifier("masterStep") Step masterStep, JobRepository jobRepository) {
-        return new JobBuilder("importTextFileJob", jobRepository)
-                .start(masterStep)
+    @Bean(name = "jobTryNews")
+    public Job job(@Qualifier("stepTryNews") Step tryNewsStep,
+                   JobRepository jobRepository) {
+        return new JobBuilder("tryNewsMyJob", jobRepository)
+                .incrementer(new RunIdIncrementer())
+                .start(tryNewsStep)
                 .build();
     }
 }

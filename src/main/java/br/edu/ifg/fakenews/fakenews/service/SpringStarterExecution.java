@@ -20,9 +20,22 @@ public class SpringStarterExecution implements CommandLineRunner {
     public void run(String... args) throws Exception {
         log.info("Args {}", Arrays.toString(args));
         if (args != null  && !Arrays.stream(args).toList().isEmpty()
-            && !args[0].isEmpty()) {
+            && !args[0].isEmpty() && args.length > 1) {
             runFile(args);
+        } else if (args != null  && !Arrays.stream(args).toList().isEmpty()
+                && !args[0].isEmpty()) {
+            runRotina(args);
         }
+    }
+
+    private void runRotina(String[] args) {
+        var status = args[0];
+        log.info("status: [{}]", status);
+
+        JobExecution jobExecution = springBatchJobExecution.runRotina(status);
+        log.info("Execucao da rotina finalizada, status execucao [{}]", jobExecution.getExitStatus()
+                .getExitDescription());
+
     }
 
     private void runFile(String[] args) {

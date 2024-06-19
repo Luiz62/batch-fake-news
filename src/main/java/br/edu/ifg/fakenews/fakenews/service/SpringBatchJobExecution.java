@@ -6,18 +6,23 @@ import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
 import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
 import org.springframework.batch.core.repository.JobRestartException;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 public class SpringBatchJobExecution {
 
-    private final Job job;
+    private final Job jobFile;
+    private final Job jobTryNews;
 
     private final JobLauncher jobLauncher;
 
-    public SpringBatchJobExecution(Job job, JobLauncher jobLauncher) {
-        this.job = job;
+    public SpringBatchJobExecution(@Qualifier("jobFile") Job jobFile,
+                                   @Qualifier("jobTryNews") Job jobTryNews,
+                                   JobLauncher jobLauncher) {
+        this.jobFile = jobFile;
+        this.jobTryNews = jobTryNews;
         this.jobLauncher = jobLauncher;
     }
 
@@ -29,7 +34,22 @@ public class SpringBatchJobExecution {
                 .toJobParameters();
 
         try {
-            return jobLauncher.run(job, jobParameters);
+            return jobLauncher.run(jobFile, jobParameters);
+        } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
+                 JobParametersInvalidException e) {
+            log.error("Falha ao executar job!", e);
+        }
+        return null;
+    }
+
+    public JobExecution runRotina(String status) {
+        JobParameters jobParameters = new JobParametersBuilder()
+                .addLong("jobId", System.currentTimeMillis())
+                .addString("status", status, false)
+                .toJobParameters();
+
+        try {
+            return jobLauncher.run(jobTryNews, jobParameters);
         } catch (JobExecutionAlreadyRunningException | JobRestartException | JobInstanceAlreadyCompleteException |
                  JobParametersInvalidException e) {
             log.error("Falha ao executar job!", e);
