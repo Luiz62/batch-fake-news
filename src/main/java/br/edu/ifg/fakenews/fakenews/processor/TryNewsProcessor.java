@@ -119,7 +119,6 @@ public class TryNewsProcessor implements ItemProcessor<Tb001News, Tb003Processed
                     .filter(word -> !word.isEmpty())
                     .collect(Collectors.toList());
 
-            // Imprime a lista de palavras limpas
             log.info("[{}] Saida: {}", id, cleanedWordsList);
 
             return String.join(" ", cleanedWordsList);
